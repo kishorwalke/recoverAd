@@ -1,6 +1,3 @@
-// ------------------------------
-// ELEMENT REFERENCES
-// ------------------------------
 const form = document.getElementById("waitlistForm");
 const submitBtn = document.getElementById("submitBtn");
 const loader = document.getElementById("loader");
@@ -20,9 +17,6 @@ const formError = document.getElementById("formError");
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
-// ------------------------------
-// STRICT EMAIL VALIDATION
-// ------------------------------
 const strictEmailRegex =
     /^(?!.*\.\.)(?!.*@.*\.$)(?!.*@\.)([a-zA-Z0-9]+[a-zA-Z0-9._%+-]{0,63})@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,10}$/;
 
@@ -54,9 +48,6 @@ function isStrictValidEmail(email) {
     return true;
 }
 
-// ------------------------------
-// FORM SUBMIT EVENT
-// ------------------------------
 form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -65,7 +56,6 @@ form.addEventListener("submit", async function (e) {
     formSuccess.classList.add("hidden");
     formError.classList.add("hidden");
 
-    // Validate Name
     if (nameField.value.trim() === "") {
         nameError.textContent = "Name is missing.";
         nameError.classList.remove("hidden");
@@ -74,7 +64,6 @@ form.addEventListener("submit", async function (e) {
         nameError.classList.add("hidden");
     }
 
-    // Validate Email
     const emailValue = emailField.value.trim();
     if (!isStrictValidEmail(emailValue)) {
         emailError.textContent = "Invalid or temporary email address.";
@@ -86,7 +75,6 @@ form.addEventListener("submit", async function (e) {
 
     if (!valid) return;
 
-    // Show Apple-style loader
     submitBtn.disabled = true;
     loader.classList.remove("hidden");
     btnText.textContent = "Submitting…";
@@ -132,7 +120,6 @@ form.addEventListener("submit", async function (e) {
         formError.classList.remove("hidden");
     }
 
-    // Hide loader
     submitBtn.disabled = false;
     loader.classList.add("hidden");
     btnText.textContent = "Request Early Access";
