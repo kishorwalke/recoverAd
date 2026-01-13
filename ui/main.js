@@ -18,6 +18,7 @@ const emailError = document.getElementById("emailError");
 const successMsg = document.getElementById("formSuccess");
 const formError = document.getElementById("formError");
 
+  document.getElementById("year").textContent = new Date().getFullYear();
 
 // ------------------------------
 // STRICT EMAIL VALIDATION
