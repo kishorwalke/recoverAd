@@ -48,6 +48,7 @@ function isStrictValidEmail(email) {
     return true;
 }
 
+
 form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -56,6 +57,7 @@ form.addEventListener("submit", async function (e) {
     formSuccess.classList.add("hidden");
     formError.classList.add("hidden");
 
+    // Validation
     if (nameField.value.trim() === "") {
         nameError.textContent = "Name is missing.";
         nameError.classList.remove("hidden");
@@ -75,56 +77,69 @@ form.addEventListener("submit", async function (e) {
 
     if (!valid) return;
 
+    // Disable button UI but DON'T wait for API
     submitBtn.disabled = true;
     loader.classList.remove("hidden");
     btnText.textContent = "Submitting…";
 
-    try {
-        const response = await fetch("https://recoverad-api.onrender.com/api/waitlist", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: nameField.value.trim(),
-                email: emailField.value.trim(),
-                website: websiteField.value.trim(),
-                traffic: trafficField.value,
-                message: messageField.value.trim(),
-            }),
-        });
+    // ------------------------------------------------
+    // 1️⃣ INSTANT EMAIL FALLBACK (no waiting)
+    // ------------------------------------------------
+    fetch("https://formspree.io/f/mjggkokw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        to: "kishorwalke2333@gmail.com",
+        name: nameField.value.trim(),
+        email: emailField.value.trim(),
+        website: websiteField.value.trim(),
+        traffic: trafficField.value,
+        message: messageField.value.trim(),
+        note: "Sent instantly to avoid Render cold-start delay."
+    }),
+    }).catch(err => console.warn("Email fallback failed:", err));
 
-        const result = await response.json();
+    // ------------------------------------------------
+    // 2️⃣ SHOW SUCCESS IMMEDIATELY (NO WAIT)
+    // ------------------------------------------------
+    formSuccess.textContent = "Thank you! Your submission has been received.";
+    formSuccess.classList.remove("hidden");
 
-        if (result.success) {
-            gtag("event", "waitlist_submission", {
-                event_category: "engagement",
-                event_label: "Waitlist Form Submitted"
-            });
+    // GA Event
+    gtag("event", "waitlist_submission", {
+        event_category: "engagement",
+        event_label: "Waitlist Form Submitted"
+    });
 
-            formError.classList.add("hidden");
-            formSuccess.textContent = "Thank you! Your submission has been received.";
-            formSuccess.classList.remove("hidden");
+    form.reset();
+    setTimeout(() => formSuccess.classList.add("hidden"), 5000);
 
-            form.reset();
-            setTimeout(() => formSuccess.classList.add("hidden"), 5000);
-        } else {
-            formSuccess.classList.add("hidden");
-            formError.textContent = "Error saving data. Please try again.";
-            formError.classList.remove("hidden");
-        }
+    // ------------------------------------------------
+    // 3️⃣ API REQUEST IN BACKGROUND (Render may take 50s)
+    // ------------------------------------------------
+    fetch("https://recoverad-api.onrender.com/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name: nameField.value.trim(),
+            email: emailField.value.trim(),
+            website: websiteField.value.trim(),
+            traffic: trafficField.value,
+            message: messageField.value.trim(),
+        }),
+    }).catch(err => {
+        console.warn("Background API error:", err);
+    });
 
-    } catch (error) {
-        console.error("API Error:", error);
-
-        formSuccess.classList.add("hidden");
-        formError.textContent = "Server error. Please try later.";
-        formError.classList.remove("hidden");
-    }
-
-    submitBtn.disabled = false;
-    loader.classList.add("hidden");
-    btnText.textContent = "Request Early Access";
-
-
+    // ------------------------------------------------
+    // 4️⃣ Restore button UI after 2 seconds
+    // ------------------------------------------------
+    setTimeout(() => {
+        submitBtn.disabled = false;
+        loader.classList.add("hidden");
+        btnText.textContent = "Join Waitlist";
+    }, 2000);
 });
+
 
 
